@@ -14,10 +14,30 @@ To set up the environment, follow these steps:
     ```
 2.	Create and activate the conda environment:
     ```bash
-    conda create -n HUB python=3.9
+    conda create -n HUB python=3.10
+
     conda activate HUB
-    pip install -r requirements.txt
+    # Install PyTorch separately (choose one):
+    #  - Conda (recommended for CUDA):
+    #      conda install -y pytorch pytorch-cuda=11.8 -c pytorch -c nvidia
+    #  - Pip (CUDA 11.8):
+    #      pip install --index-url https://download.pytorch.org/whl/cu118 --extra-index-url https://pypi.org/simple "torch==2.7.1+cu118" torchvision torchaudio
+    #  - CPU-only (pip):
+    #      pip install torch==2.7.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
+
+    # After installing PyTorch (e.g., with conda), install the remaining pip packages without dependencies
+    # so pip does not attempt to reinstall PyTorch or conflicting CUDA wheels:
+    pip install -r requirements.txt --no-deps
     ```
+
+    ⚠️ **Note on binary package conflicts**:
+    - Some packages (e.g., `opencv-python`, `pyarrow`) have strict NumPy requirements and may require specific NumPy versions (1.x vs 2.x). If you encounter errors like "compiled with NumPy 1.x", prefer installing these binaries via conda for compatibility.
+    - Example (install with conda-forge):
+      ```bash
+      conda install -y numpy=1.26 pyarrow opencv -c conda-forge
+      ```
+    - Alternatively, pick a consistent NumPy major version (>=2 or <2) and install matching binary packages via conda or the appropriate wheel index.
+    - If you want, I can recommend exact commands tailored to your GPU/OS.
 
 ### Download pre-trained models and datasets
 - [Reference image dataset](https://huggingface.co/datasets/hi-sammy/HUB_reference_images)
@@ -171,3 +191,61 @@ python source/eval/eval_vlm.py \
         year={2024}
     }
 
+
+===
+
+Let me prepare a short, precise step-by-step guide to install the NVIDIA driver on Ubuntu and some diagnostic commands to run; please run the checks I list and paste outputs if anything fails.## NVIDIA driver install guide for Ubuntu 🔧🐧
+
+Below are the checks and the simplest, safest install steps. Run the diagnostic commands first and paste their outputs if something fails — I’ll give exact fixes.
+
+1) Run these diagnostic checks (paste outputs) 🧾
+```
+lsb_release -a
+uname -r
+lspci -nn | grep -i nvidia || echo "No NVIDIA devices found"
+sudo ubuntu-drivers devices
+which nvidia-smi && nvidia-smi || echo "nvidia-smi not found / driver not active"
+```
+2) Recommended quick install (works for most Ubuntu systems) ✅
+This uses Ubuntu's driver tooling and the graphics-drivers PPA:
+```
+sudo apt update
+sudo apt install -y build-essential dkms linux-headers-$(uname -r) software-properties-common
+sudo add-apt-repository -y ppa:graphics-drivers/ppa
+sudo apt update
+sudo ubuntu-drivers autoinstall
+sudo reboot
+```
+
+This installs the driver Ubuntu recommends for your GPU and kernel.
+If you prefer a specific driver (example: 535): sudo apt install -y nvidia-driver-535
+3) Verify installation ✅
+After reboot:
+```
+nvidia-smi
+lsmod | grep nvidia
+```
+nvidia-smi should show your GPU and driver version.
+If you plan to use CUDA/PyTorch: check python -c "import torch; print(torch.cuda.is_available())" after installing compatible PyTorch.
+4) Secure Boot & module signing ⚠️
+If Secure Boot is enabled, the kernel may block NVIDIA modules.
+Check: sudo apt install -y mokutil && sudo mokutil --sb-state
+If enabled, either disable Secure Boot in your BIOS/UEFI or follow Ubuntu’s module-signing/MOK enrollment steps (I can give instructions if needed).
+5) Common troubleshooting tips 🛠️
+If linux-headers-$(uname -r) fails: run sudo apt install linux-headers-generic and reboot, then retry driver install.
+If ubuntu-drivers devices shows “no drivers”: confirm GPU presence with lspci.
+If driver install fails, paste the last apt output or dmesg | grep -i nvidia so I can analyze it.
+6) CUDA / PyTorch notes 💡
+If you need CUDA for PyTorch, use the driver version required by the CUDA toolkit you want; I can give exact install commands (conda or apt/pip) once you tell me your Ubuntu version and whether you want CUDA system-wide or via conda.
+If you want, run the diagnostic commands and paste the outputs here and I’ll give the exact install commands tailored to your Ubuntu/GPU and walk you through any error you hit. ✅
+
+# torch is platform/CUDA-specific: install via conda or PyTorch site
+# torch==2.7.1+cu118
+torch==2.7.1  # (install +cu118 via pip index or use conda)
+
+
+python source/image_generation.py \
+  --method sd \
+  --target "Nudity" \
+  --task pinpoint_ness \
+  --device cpu \ 

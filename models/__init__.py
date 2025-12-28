@@ -16,8 +16,12 @@ def load_model_sd(
     method,
     target,
     device="cuda:0",
-    dtype=torch.float16,
+    dtype=None,
 ):
+    device_str = str(device)
+    if dtype is None:
+        dtype = torch.float32 if device_str.startswith("cpu") else torch.float16
+
     # ! Add your method in the list
     assert method in ["sd", "esd", "uce", "salun", "ac", "sa", "receler", "sld", "mace"]
 
