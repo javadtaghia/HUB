@@ -249,3 +249,150 @@ python source/image_generation.py \
   --target "Nudity" \
   --task pinpoint_ness \
   --device cpu \ 
+
+models:
+Those names are **shorthand labels for different Stable Diffusion model variants or unlearning / safety techniques**, not official Hugging Face class names. You usually map them to **different checkpoints or training methods** and then load them with the same Diffusers API.
+
+
+
+---
+
+### **sd**
+
+**Stable Diffusion (baseline)**
+The original, unmodified model.
+
+* No safety or unlearning applied
+* Used as the reference model
+* Example base: Stable Diffusion
+
+---
+
+### **esd**
+
+**Erased Stable Diffusion**
+A model where **specific concepts are erased** (for example artists, objects, styles).
+
+* Uses concept-erasure training
+* Often based on gradient projection or feature suppression
+* Popular in “artist removal” papers
+
+---
+
+### **uce**
+
+**Unified Concept Editing**
+A method to **edit, suppress, or enhance concepts** in diffusion models.
+
+* More flexible than ESD
+* Can erase, weaken, or amplify concepts
+* Often prompt- or latent-guided
+
+---
+
+### **salun**
+
+**Safe and Accurate Latent UNlearning**
+A structured unlearning method that removes concepts **while preserving non-target behavior**.
+
+* Works in latent space
+* Emphasizes retain vs forget balance
+* Known from the SALUN paper and benchmarks
+* SALUN
+
+---
+
+### **ac**
+
+**Adversarial Conditioning**
+Uses adversarial objectives to prevent generation of a target concept.
+
+* Instead of erasing weights directly, it disrupts conditioning
+* Often harder to detect but less surgical
+* Can affect generation quality
+
+---
+
+### **sa**
+
+**Safety-Aware / Self-Attention based suppression**
+Usually refers to **attention manipulation**.
+
+* Suppresses concepts via attention maps
+* Non-destructive, reversible
+* Sometimes implemented as inference-time masking
+
+---
+
+### **receler**
+
+**Re-Centered Latent Erasure (or similar naming)**
+A newer / less standardized term.
+
+* Typically re-centers latent distributions to remove concept clusters
+* Often experimental
+* Name varies by repo
+
+---
+
+### **sld**
+
+**Safe Latent Diffusion**
+A safety-enhanced Stable Diffusion variant.
+
+* Applies safety constraints in latent space
+* Often compared with SALUN
+* Tries to reduce harmful outputs without full erasure
+
+---
+
+### **mace**
+
+**Model-Agnostic Concept Erasure**
+One of the more formal and popular unlearning methods.
+
+* Works across architectures
+* Minimal retraining
+* Strong preservation of unrelated concepts
+* MACE
+
+---
+
+### **Important clarification**
+
+These **are not loaded like this**:
+
+```python
+StableDiffusionPipeline.from_pretrained("mace")
+```
+
+Instead, they usually map to:
+
+* Different **checkpoints**
+* Different **fine-tuned UNet weights**
+* Different **training recipes**
+
+Example:
+
+```python
+pipe = StableDiffusionPipeline.from_pretrained(
+    "your-org/sd-v1-5-mace-cat-erased",
+    torch_dtype=torch.float16
+)
+```
+
+---
+
+### **Mental model**
+
+Think of them as **labels for how the model was trained**, not model classes:
+
+```
+Stable Diffusion
+ ├─ ESD  (hard erase)
+ ├─ MACE (surgical erase)
+ ├─ SALUN (balanced unlearning)
+ ├─ SLD (safety-first)
+ └─ AC / SA (conditioning & attention tricks)
+```
+
