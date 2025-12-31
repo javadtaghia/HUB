@@ -32,6 +32,16 @@ def _list_images(dir_path):
     return [f for f in os.listdir(dir_path) if f.lower().endswith(_IMAGE_EXTS)]
 
 
+def _has_any_image_recursive(dir_path):
+    if not os.path.isdir(dir_path):
+        return False
+    for _root, _dirs, files in os.walk(dir_path):
+        for file in files:
+            if file.lower().endswith(_IMAGE_EXTS):
+                return True
+    return False
+
+
 def _numeric_stem_key(filename):
     stem, _ext = os.path.splitext(filename)
     if stem.isdigit():
@@ -57,8 +67,31 @@ def evaluate_fid(input_dir):
 
 
 # * https://github.com/boomb0om/text2image-benchmark
-def evaluate_fid_sd(input_dir):
-    fid, _ = calculate_fid(input_dir, FID_SD_IMAGE_PATH)
+def _resolve_fid_sd_reference(target, seed):
+    if isinstance(FID_SD_IMAGE_PATH, str):
+        if FID_SD_IMAGE_PATH.endswith(".npz"):
+            if os.path.isfile(FID_SD_IMAGE_PATH):
+                return FID_SD_IMAGE_PATH
+        elif _has_any_image_recursive(FID_SD_IMAGE_PATH):
+            return FID_SD_IMAGE_PATH
+
+    fallback_dir = _resolve_img_dir("general_image", "sd", target, seed)
+    if _list_images(fallback_dir):
+        return fallback_dir
+
+    raise ValueError(
+        "FID_SD reference images/stats not found. "
+        f"Set `FID_SD_IMAGE_PATH` in `envs.py` to either a `.npz` stats file or a directory of images, "
+        f"or generate baseline SD images at '{IMG_DIR}/general_image/sd/{target}/{seed}' "
+        f"(or '{IMG_DIR}/general_image_/sd/{target}/{seed}')."
+    )
+
+
+def evaluate_fid_sd(input_dir, target, seed):
+    ref = _resolve_fid_sd_reference(target, seed)
+    if os.path.abspath(str(ref)) == os.path.abspath(str(input_dir)):
+        return 0.0
+    fid, _ = calculate_fid(input_dir, ref)
     return fid
 
 
@@ -136,6 +169,20 @@ def quality_evaluation(metric, task, method, target, device, logger, seed=1):
 
     # Load the model for each metric
     if metric == "aesthetic":
+        if not os.path.isfile(AESTHETIC_PTH):
+            raise FileNotFoundError(
+                f"Aesthetic weights not found at '{AESTHETIC_PTH}'. "
+                "Download `sac+logos+ava1-l14-linearMSE.pth` and place it there."
+            )
+        with open(AESTHETIC_PTH, "rb") as f:
+            header = f.read(256).lstrip()
+        if header.startswith(b"<!DOCTYPE html") or header.startswith(b"<html"):
+            raise ValueError(
+                f"'{AESTHETIC_PTH}' looks like an HTML page (common when downloading from GitHub without the raw URL). "
+                "Re-download the weights file, e.g.\n"
+                "wget -O models/aesthetic_predictor/sac+logos+ava1-l14-linearMSE.pth "
+                "https://github.com/christophschuhmann/improved-aesthetic-predictor/raw/main/sac%2Blogos%2Bava1-l14-linearMSE.pth"
+            )
         model = Aesthetic(768)
         model.load_state_dict(torch.load(AESTHETIC_PTH, map_location="cpu"))
         model.eval().to(device)
@@ -173,7 +220,7 @@ def quality_evaluation(metric, task, method, target, device, logger, seed=1):
 
     # for each image in the input directory, calculate the score
     elif metric == "FID_SD":
-        score_result = evaluate_fid_sd(img_dir)
+        score_result = evaluate_fid_sd(img_dir, target, seed)
 
     else:
         scores = 0.0

@@ -47,6 +47,11 @@ To set up the environment, follow these steps:
 - [Aesthetic Predictor](https://github.com/christophschuhmann/improved-aesthetic-predictor)
   - For aesthetic score, we use the `sac+logos+ava1-l14-linearMSE.pth` model. 
   - Place it in the `/models/aesthetic_predictor` directory.
+  - Download (make sure you fetch the raw `.pth`, not an HTML page):
+    ```bash
+    wget -O models/aesthetic_predictor/sac+logos+ava1-l14-linearMSE.pth \
+      https://github.com/christophschuhmann/improved-aesthetic-predictor/raw/main/sac%2Blogos%2Bava1-l14-linearMSE.pth
+    ```
 
 - [Q16](https://github.com/ml-research/Q16?tab=readme-ov-file)
     - Download `prompts.p` from [this link](https://drive.google.com/file/d/1lWKdUTvPDWY9hw7ruDdCHXMOqs24PbQq/view?usp=sharing) and place it at `/models/q16/` directory.
@@ -399,4 +404,3 @@ Stable Diffusion
  ├─ SLD (safety-first)
  └─ AC / SA (conditioning & attention tricks)
 ```
-

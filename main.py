@@ -8,7 +8,17 @@ from source.eval.eval_selective_alignment import eval_selective_alignment
 from source.quality.evaluation import quality_evaluation
 from source.utils import set_logger
 from source.image_generation import image_generation
-from envs import IMG_DIR, LANGUAGES, STYLE_LIST, CELEBRITY_LIST, IP_LIST, NSFW_LIST, NUM_TARGET_IMGS, NUM_GENERAL_IMGS
+from envs import (
+    IMG_DIR,
+    LANGUAGES,
+    STYLE_LIST,
+    CELEBRITY_LIST,
+    IP_LIST,
+    NSFW_LIST,
+    NUM_TARGET_IMGS,
+    NUM_GENERAL_IMGS,
+    FID_SD_IMAGE_PATH,
+)
 
 
 def get_args():
@@ -27,6 +37,16 @@ def _count_images(dir_path):
     if not os.path.isdir(dir_path):
         return 0
     return sum(1 for f in os.listdir(dir_path) if f.lower().endswith(_IMAGE_EXTS))
+
+
+def _has_any_image_recursive(dir_path):
+    if not os.path.isdir(dir_path):
+        return False
+    for _root, _dirs, files in os.walk(dir_path):
+        for file in files:
+            if file.lower().endswith(_IMAGE_EXTS):
+                return True
+    return False
 
 
 def check_images(task, method, target, seed, device, logger):
@@ -92,6 +112,15 @@ if __name__ == "__main__":
     # General image quality
     logger.info(f"General image quality")
     check_images("general_image", args.method, args.target, args.seed, args.device, logger)
+    fid_sd_ref_ready = False
+    if isinstance(FID_SD_IMAGE_PATH, str):
+        if FID_SD_IMAGE_PATH.endswith(".npz"):
+            fid_sd_ref_ready = os.path.isfile(FID_SD_IMAGE_PATH)
+        else:
+            fid_sd_ref_ready = _has_any_image_recursive(FID_SD_IMAGE_PATH)
+
+    if args.method != "sd" and not fid_sd_ref_ready:
+        check_images("general_image", "sd", args.target, args.seed, args.device, logger)
     for metric in ["FID", "FID_SD"]:
         quality_evaluation(
             metric,
