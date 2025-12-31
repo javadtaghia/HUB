@@ -23,6 +23,33 @@ def normalized(a, axis=-1, order=2):
     return a / l2
 
 
+_IMAGE_EXTS = (".jpg", ".jpeg", ".png", ".webp")
+
+
+def _list_images(dir_path):
+    if not os.path.isdir(dir_path):
+        return []
+    return [f for f in os.listdir(dir_path) if f.lower().endswith(_IMAGE_EXTS)]
+
+
+def _numeric_stem_key(filename):
+    stem, _ext = os.path.splitext(filename)
+    if stem.isdigit():
+        return (0, int(stem))
+    return (1, stem)
+
+
+def _resolve_img_dir(task, method, target, seed):
+    for task_name in (task, f"{task}_"):
+        base_dir = f"{IMG_DIR}/{task_name}/{method}/{target}"
+        seed_dir = f"{base_dir}/{seed}"
+        if _list_images(seed_dir):
+            return seed_dir
+        if _list_images(base_dir):
+            return base_dir
+    return f"{IMG_DIR}/{task}/{method}/{target}/{seed}"
+
+
 # * https://github.com/boomb0om/text2image-benchmark
 def evaluate_fid(input_dir):
     fid, _ = calculate_fid(input_dir, get_coco_fid_stats())
@@ -43,7 +70,7 @@ def evaluate_aesthetic(model_clip, preprocess, model, images, device):
         image_features = model_clip.encode_image(images)
 
     im_emb_arr = normalized(image_features)
-    score = model(im_emb_arr.type(torch.cuda.FloatTensor)).squeeze().cpu().data.numpy()
+    score = model(im_emb_arr.float()).squeeze().detach().cpu().data.numpy()
 
     if isinstance(score, list):
         score = score[0]
@@ -94,7 +121,7 @@ def evaluate_pickscore(prompt, images, processor, model, device):
     return scores.cpu().tolist()
 
 
-def quality_evaluation(metric, task, method, target, device, logger):
+def quality_evaluation(metric, task, method, target, device, logger, seed=1):
 
     assert (task == "target_image" and metric == "aesthetic") or (
         task == "general_image" and metric in ["ImageReward", "PickScore", "FID", "FID_SD"]
@@ -110,7 +137,7 @@ def quality_evaluation(metric, task, method, target, device, logger):
     # Load the model for each metric
     if metric == "aesthetic":
         model = Aesthetic(768)
-        model.load_state_dict(torch.load(AESTHETIC_PTH))
+        model.load_state_dict(torch.load(AESTHETIC_PTH, map_location="cpu"))
         model.eval().to(device)
 
         model_clip, preprocess = clip.load("ViT-L/14", device=device)
@@ -129,46 +156,66 @@ def quality_evaluation(metric, task, method, target, device, logger):
         )
 
     # Evaluate the faithfulness of generated images
-    img_dir = f"{IMG_DIR}/{task}/{method}/{target}"
+    img_dir = _resolve_img_dir(task, method, target, seed)
+    image_files = sorted(_list_images(img_dir), key=_numeric_stem_key)
+    if not image_files:
+        raise ValueError(
+            f"No images found for {task}/{method}/{target} (seed={seed}). "
+            f"Expected images under '{IMG_DIR}/{task}/{method}/{target}/{seed}'. "
+            f"If you generated into '{IMG_DIR}/{task}_/...', either rename that folder "
+            f"or regenerate with: python source/image_generation.py --method {method} "
+            f'--target "{target}" --task {task} --seed {seed} --device {device}'
+        )
 
     # for each image in the input directory, calculate the score
     if metric == "FID":
-        score = evaluate_fid(img_dir)
-        score_result = score
+        score_result = evaluate_fid(img_dir)
 
     # for each image in the input directory, calculate the score
-    if metric == "FID_SD":
-        score = evaluate_fid_sd(img_dir)
-        score_result = score
+    elif metric == "FID_SD":
+        score_result = evaluate_fid_sd(img_dir)
 
     else:
-        scores = 0
-        for i in tqdm(range(0, len(os.listdir(img_dir)))):
-            img = Image.open(f"{img_dir}/{i}.jpg")
+        scores = 0.0
+        for filename in tqdm(image_files):
+            img = Image.open(f"{img_dir}/{filename}")
+            key_kind, key_value = _numeric_stem_key(filename)
+            idx = key_value if key_kind == 0 else None
 
             # Calculate the score
             if metric == "aesthetic":  # aesthetic score doesn't need prompt
                 score = evaluate_aesthetic(model_clip, preprocess, model, img, device)
             elif metric == "ImageReward":
-                score = evaluate_ImageReward(prompt[i], img, model)
+                if idx is None:
+                    raise ValueError(
+                        f"Unexpected non-numeric filename for {metric}: {filename}"
+                    )
+                score = evaluate_ImageReward(prompt[idx], img, model)
             elif metric == "PickScore":
-                score = evaluate_pickscore(prompt[i], img, processor, model, device)
+                if idx is None:
+                    raise ValueError(
+                        f"Unexpected non-numeric filename for {metric}: {filename}"
+                    )
+                score = evaluate_pickscore(prompt[idx], img, processor, model, device)
 
             if isinstance(score, list):
                 score = score[0]
-            scores += score
-        score_result = scores / len(os.listdir(img_dir))
+            scores += float(score)
+        score_result = scores / len(image_files)
 
 
     if task == "general_image" and metric in ["FID", "FID_SD"]:
+        os.makedirs(f"{LOG_DIR}/results", exist_ok=True)
         with open(f"{LOG_DIR}/results/general_image_quality.csv", "a") as f:
-            f.write(f"{method},{target},{score},{metric}\n")
+            f.write(f"{method},{target},{score_result},{metric}\n")
     elif task == "general_image" and metric in ["ImageReward", "PickScore"]:
+        os.makedirs(f"{LOG_DIR}/results", exist_ok=True)
         with open(f"{LOG_DIR}/results/general_image_alignment.csv", "a") as f:
-            f.write(f"{method},{target},{score},{metric}\n")
+            f.write(f"{method},{target},{score_result},{metric}\n")
     elif task == "target_image" and metric == "aesthetic":
+        os.makedirs(f"{LOG_DIR}/results", exist_ok=True)
         with open(f"{LOG_DIR}/results/target_image_quality.csv", "a") as f:
-            f.write(f"{method},{target},{score},{metric}\n")
+            f.write(f"{method},{target},{score_result},{metric}\n")
     else:
         raise ValueError(f"Invalid task settings")
 
@@ -191,11 +238,18 @@ if __name__ == "__main__":
     parser.add_argument("--method", required=True)
     parser.add_argument("--target", required=True)
     parser.add_argument("--device", default="cuda:0")
+    parser.add_argument("--seed", type=int, default=1)
 
     args = parser.parse_args()
 
     logger = set_logger()
 
     quality_evaluation(
-        args.metric, args.task, args.method, args.target, args.device, logger
+        args.metric,
+        args.task,
+        args.method,
+        args.target,
+        args.device,
+        logger,
+        seed=args.seed,
     )

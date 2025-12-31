@@ -76,7 +76,7 @@ def image_generation(task, method, target, seed, device, logger):
             
             logger.info(f"Completed generating images for {lang}")
     else:
-        for i in tqdm(range(0, len(prompt))):
+        for i in tqdm(range(0, min(len(prompt), 30))):
             for j in tqdm(range(num_per_prompt)):
                 image = model(prompt[i], _is_progress_bar_enabled=False).images[0]
                 image.save(f"{save_dir}/{i * num_per_prompt + j}.jpg")

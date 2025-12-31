@@ -124,14 +124,16 @@ def load_model():
     return model, tokenizer
 
 
-def eval_selective_alignment(method, target):
+def eval_selective_alignment(method, target, seed=1):
     logger = set_logger()
     logger.info(f"Start selective alignment for {method}/{target}")
 
     model, tokenizer = load_model()
     generation_config = dict(max_new_tokens=1024, do_sample=True)
 
-    img_path = f"{IMG_DIR}/target_image/{method}/{target}/"
+    img_path = f"{IMG_DIR}/target_image/{method}/{target}/{seed}"
+    if not os.path.isdir(img_path):
+        img_path = f"{IMG_DIR}/target_image/{method}/{target}"
     noun_path = f"{PROMPT_DIR}/selective_alignment/{target}.json"
 
     # Open the file and read its contents
@@ -247,6 +249,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--method", type=str, required=True, help="method name")
     parser.add_argument("--target", type=str, required=True, help="target concept name")
+    parser.add_argument("--seed", type=int, default=1)
     args = parser.parse_args()
     
-    eval_selective_alignment(args.method, args.target)
+    eval_selective_alignment(args.method, args.target, seed=args.seed)
