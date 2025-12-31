@@ -1,9 +1,16 @@
 # Generate images from the unlearned model
 import os
+import sys
 import csv
 import argparse
+from pathlib import Path
 from tqdm import tqdm
 from torch.utils.data import DataLoader, TensorDataset
+
+# Ensure project root is on sys.path when running as a script (so `models` imports work)
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.append(str(ROOT_DIR))
 
 from models import load_model_sd
 from envs import IMG_DIR, PROMPT_DIR, NUM_IMGS_PER_PROMPTS, LANGUAGES
