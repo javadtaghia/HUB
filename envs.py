@@ -24,7 +24,7 @@ NSFW_Q16_PROMPT_PATH = f"{PROJECT_DIR}/models/q16/prompts.p"
 GUIDANCE_SCALE = 7.5
 
 # Required number of images
-NUM_TARGET_IMGS = 10000
+NUM_TARGET_IMGS = 9873
 NUM_GENERAL_IMGS = 30000
 
 # Required number of images per prompt

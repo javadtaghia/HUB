@@ -134,7 +134,7 @@ def eval_vlm(task, method, target, seed, language=None, style=False):
     generation_config = dict(max_new_tokens=1024, do_sample=True)
 
     if task == 'multilingual_robustness':
-        img_path = f"{IMG_DIR}/{task}/{method}/{target}/{language}/{seed}"
+        img_path = f"{IMG_DIR}/{task}/{method}/{target}/{seed}/{language}"
     elif task == 'target_proportion':
         img_path = f"{IMG_DIR}/target_image/{method}/{target}/{seed}"
     else:
