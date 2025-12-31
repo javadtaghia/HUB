@@ -68,6 +68,9 @@ python source/image_generation.py \
 
 `TASK` must be one of the following: `target_image`, `general_image`, `selective_alignment`, `pinpoint_ness`, `multilingual_robustness`, `attack_robustness`, `incontext_ref_image`.
 
+```
+ python source/image_generation.py --method sd --target "Nudity" --task pinpoint_ness 
+```
 
 ## 💬 Prompt generation
 All prompts used in our experiments are provided in the `prompts/` directory.
@@ -110,7 +113,8 @@ For now, we support the following seven unlearning methods: [SLD](https://arxiv.
 ### Run the evaluation
 To run the all tasks at once, execute the following command:
 ```bash
-python main.py --method YOUR_METHOD --target TARGET
+python main.py --method sd --target "Nudity"
+/home/ubuntu/miniconda3/envs/HUB-clean/bin/python main.py --method sd --target "Nudity"
 ```
 
 ## 🎯 How to evaluate each task individually?

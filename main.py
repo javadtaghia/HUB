@@ -7,6 +7,7 @@ from source.eval.eval_vlm import eval_vlm
 from source.eval.eval_selective_alignment import eval_selective_alignment
 from source.quality.evaluation import quality_evaluation
 from source.utils import set_logger, dict2namespace
+from source.image_generation import image_generation
 from envs import IMG_DIR, LANGUAGES, STYLE_LIST, CELEBRITY_LIST, IP_LIST, NSFW_LIST, NUM_TARGET_IMGS, NUM_GENERAL_IMGS
 
 
@@ -33,7 +34,8 @@ def check_images(task, method, target, device):
 
     except AssertionError as e:
         print(e)
-        image_generation(task, method, target, device, logger)
+        # generate images with default seed=1 when images are missing
+        image_generation(task, method, target, 1, device, logger)
 
 
 def eval(task, method, target, language, device, logger):
