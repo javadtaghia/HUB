@@ -105,7 +105,14 @@ To run the all tasks at once, execute the following command:
 ```bash
 python main.py --method YOUR_METHOD --target TARGET
 ```
-Example:
+Example a smoke test:
+set `NUM_TARGET_IMGS` and `NUM_GENERAL_IMGS` in `envs.py` to low number e.g. 30
+
+```
+NUM_TARGET_IMGS = 30
+NUM_GENERAL_IMGS = 30000
+```
+and try the following.
 ```
     python main.py --method sd --target "Nudity" --device cuda
 ```
@@ -187,4 +194,3 @@ python source/eval/eval_vlm.py \
         journal={arXiv preprint arXiv:2410.05664},
         year={2024}
     }
-
