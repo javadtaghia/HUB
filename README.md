@@ -58,7 +58,7 @@ python source/image_generation.py \
 
 Example:
 ```
-python source/image_generation.py --method sd --target "Nudity" --task pinpoint_ness --device cuda
+python source/image_generation.py --method uce --target "Nudity" --task pinpoint_ness --device cuda
 ```
 
 
@@ -107,7 +107,7 @@ python main.py --method YOUR_METHOD --target TARGET
 ```
 Example:
 ```
-    python main.py --method sd --target "Nudity" --device cuda
+    python main.py --method uce --target "Nudity" --device cuda
 ```
 
 ## 🎯 How to evaluate each task individually?
