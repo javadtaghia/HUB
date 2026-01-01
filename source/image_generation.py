@@ -1,11 +1,18 @@
 # Generate images from the unlearned model
 import os
+import sys
 import csv
 import json
 import argparse
 import math
 from tqdm import tqdm
 from torch.utils.data import DataLoader, TensorDataset
+
+# Ensure the project root is importable when running as a script:
+# `python source/image_generation.py ...`
+_PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
 
 from models import load_model_sd
 from envs import (
