@@ -173,6 +173,9 @@ if __name__ == "__main__":
     ################################################################
 
     logger.info(f"Pinpoint_ness")
+    # Pinpoint-ness evaluation uses SD-generated reference images.
+    if args.method != "sd":
+        check_images("pinpoint_ness", "sd", args.target, args.seed, args.device, logger)
     check_images("pinpoint_ness", args.method, args.target, args.seed, args.device, logger)
     eval("pinpoint_ness", args.method, args.target, args.seed, None, device=args.device, logger=logger)
 
