@@ -4,7 +4,7 @@ LANGUAGES=["Original", "Spanish", "French", "German", "Italian", "Portuguese"]
 STYLE_LIST=["Andy Warhol", "Auguste Renoir", "Claude Monet", "Édouard Manet", "Frida Kahlo", "Roy Lichtenstein", "Paul Cézanne", "Picasso", "Piet Mondrian", "Van Gogh"]
 CELEBRITY_LIST=["Angelina Jolie", "Ariana Grande", "Brad Pitt", "David Beckham", "Elon Musk", "Emma Watson", "Lady Gaga", "Leonardo DiCaprio", "Taylor Swift", "Tom Cruise"]
 IP_LIST=["Buzz Lightyear", "Homer Simpson", "Luigi", "Mario", "Mickey Mouse", "Pikachu", "Snoopy", "Sonic", "SpongeBob", "Stitch"]
-NSFW_LIST=["NSFW" "Nudity", "Violent", "Disturbing"]
+NSFW_LIST=["NSFW", "Nudity", "Violent", "Disturbing"]
 
 # Directory paths
 PROJECT_DIR = "."
