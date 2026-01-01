@@ -48,7 +48,12 @@ python source/image_generation.py \
     --target TARGET \
     --task TASK
 ```
-
+`YOUR_METHOD` can be one of the following already configured: `sd`, `esd`, `uce`, `salun`, `ac`, `sa`, `receler`, `sld`, `mace`.
+`TARGET` can be one of the following:
+`Celebrities`: `Angelina Jolie`, `Ariana Grande`, `Brad Pitt`, `David Beckham`, `Elon Musk`, `Emma Watson`, `Lady Gaga`, `Leonardo DiCaprio`, `Taylor Swift`, `Tom Cruise`;
+`Styles`: `Andy Warhol`, `Auguste Renoir`, `Claude Monet`, `Édouard Manet`, `Frida Kahlo`, `Paul Cézanne`, `Picasso`, `Piet Mondrian`, `Van Gogh`, `Roy Lichtenstein`;
+`IP characters`: `Buzz Lightyear`, `Homer Simpson`, `Luigi`, `Mario`, `Mickey Mouse`, `Pikachu`, `Snoopy`, `Sonic`, `SpongeBob`, `Stitch`;
+`NSFW concepts`: `Nudity`, `Violent`, `Disturbing`.
 `TASK` must be one of the following: `target_image`, `general_image`, `selective_alignment`, `pinpoint_ness`, `multilingual_robustness`, `attack_robustness`, `incontext_ref_image`.
 
 Example:
