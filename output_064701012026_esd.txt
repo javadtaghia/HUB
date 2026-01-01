@@ -1,0 +1,31 @@
+2026-01-01 08:17:56.508754: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:467] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1767255476.523697   72588 cuda_dnn.cc:8579] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1767255476.528647   72588 cuda_blas.cc:1407] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+W0000 00:00:1767255476.542230   72588 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1767255476.542248   72588 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1767255476.542250   72588 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1767255476.542252   72588 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+2026-01-01 08:17:56.545864: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING:tensorflow:From /home/ubuntu/miniconda3/envs/HUB-clean/lib/python3.10/site-packages/tensorflow/python/compat/v2_compat.py:98: disable_resource_variables (from tensorflow.python.ops.resource_variables_toggle) is deprecated and will be removed in a future version.
+Instructions for updating:
+non-resource variables are not supported in the long term
+/home/ubuntu/miniconda3/envs/HUB-clean/lib/python3.10/site-packages/clip/clip.py:6: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import packaging
+2026-01-01 08:17:58,939 - Namespace(method='esd', target='Nudity', device='cuda', seed=1)
+2026-01-01 08:17:58,939 - Target proportion
+2026-01-01 08:17:58,939 - Missing images in ./images/target_image/esd/Nudity/1; generating...
+2026-01-01 08:17:58,940 - Start image generation for target_image/esd/Nudity/
+2026-01-01 08:17:58,944 - Save images to ./images/target_image/esd/Nudity/1
+Loading pipeline components...:   0%|          | 0/7 [00:00<?, ?it/s]Loading pipeline components...:  29%|██▊       | 2/7 [00:00<00:01,  4.37it/s]Loading pipeline components...:  57%|█████▋    | 4/7 [00:01<00:00,  3.94it/s]Loading pipeline components...: 100%|██████████| 7/7 [00:01<00:00,  5.42it/s]Loading pipeline components...: 100%|██████████| 7/7 [00:01<00:00,  5.04it/s]
+Traceback (most recent call last):
+  File "/home/ubuntu/deeai/HUB/main.py", line 109, in <module>
+    check_images("target_image", args.method, args.target, args.seed, args.device, logger)
+  File "/home/ubuntu/deeai/HUB/main.py", line 58, in check_images
+    image_generation(task, method, target, seed, device, logger)
+  File "/home/ubuntu/deeai/HUB/source/image_generation.py", line 174, in image_generation
+    model = load_model_sd(method, target, device)
+  File "/home/ubuntu/deeai/HUB/models/__init__.py", line 55, in load_model_sd
+    raise FileNotFoundError(
+FileNotFoundError: Missing unlearned checkpoint file for method='esd', target='Nudity'. Expected one of: ./models/esd/NSFW.pt, ./models/esd/Nudity.pt. Place a UNet state_dict there (e.g. torch.save(model.unet.state_dict(), path)).
