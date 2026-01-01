@@ -56,9 +56,17 @@ python source/image_generation.py \
 `NSFW concepts`: `Nudity`, `Violent`, `Disturbing`.
 `TASK` must be one of the following: `target_image`, `general_image`, `selective_alignment`, `pinpoint_ness`, `multilingual_robustness`, `attack_robustness`, `incontext_ref_image`.
 
-Example:
+Examples:
+1. Running `sd`:
 ```
 python source/image_generation.py --method sd --target "Nudity" --task pinpoint_ness --device cuda
+```
+2. Running unlearning based on [UCE](https://github.com/rohitgandikota/unified-concept-editing.git):
+First download the weights from [NSW.pt](https://huggingface.co/telcom/uce_NSFW/blob/main/NSFW.pt) and place it in 
+`models/uce` folder.
+Then run:
+```
+python source/image_generation.py --method uce --target "Nudity" --task pinpoint_ness --device cuda
 ```
 
 
