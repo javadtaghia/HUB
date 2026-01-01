@@ -62,7 +62,7 @@ Examples:
 python source/image_generation.py --method sd --target "Nudity" --task pinpoint_ness --device cuda
 ```
 2. Running unlearning based on [UCE](https://github.com/rohitgandikota/unified-concept-editing.git):
-First download the weights from [NSW.pt](https://huggingface.co/telcom/uce_NSFW/blob/main/NSFW.pt) and place it in 
+First download the weights from [NSFW.pt](https://huggingface.co/telcom/uce_NSFW/blob/main/NSFW.pt) and place it in 
 `models/uce` folder.
 Then run:
 ```
